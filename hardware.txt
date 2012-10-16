@@ -1,0 +1,34 @@
+Szia Peti!
+
+Az LCD modul HD44780 vezérlot tartalmaz.
+
+A kijelzés az alábbi formátumban lenne jó:
+
+ _____________________
+I   U= 0,00 V                   I      
+I    I=  0,00mA                 I
+______________________
+
+Az áram kijelzés alap esetben mA ben jelez és automatikusan A-re vált ha eléri a 999-et onnan amperben mutat.
+
+A kapcsolasban az  értékek a 32V 5A -es verziónak megfelelõen van beállítva.
+
+A tápegység amit építettem rendelkezik finom és durva szabályzó potméterekkel,
+mind áram és feszültség tekintetben. A durva szabályozó átfogása a teljes tartományra
+kiterjed a finom kb 1...1,5V-ot fog át. 
+
+
+Azt nem tudom, hogy milyen lépés pontosságot lehet elérni a modullal, a tesztek 
+alapján 0,03 -- 0,04 -es lépés felbontást tapasztaltam, de ugye nem helipotmétert
+használok, de nincs is értelme.
+
+
+Az ATtiny26 elméletileg 1MHz es órajellel megy gyári fuse bitekkel, de ezt te biztosan
+jobban meg tudod ítélni, hogy lesz jó a mérés szempontjából. A lényeg, hogy maradjunk
+a belsõ RC oszcillátornál.
+
+
+A mérõ modul 1%-os vagy jobb tûrésû ellenállásokból épül fel.
+
+
+

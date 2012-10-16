@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "AVRMultimeter", "AVRMultimeter.cproj", "{817991AA-BE74-4889-861D-C3ECEA8CEDF2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{817991AA-BE74-4889-861D-C3ECEA8CEDF2}.Debug|AVR.ActiveCfg = Debug|AVR
+		{817991AA-BE74-4889-861D-C3ECEA8CEDF2}.Debug|AVR.Build.0 = Debug|AVR
+		{817991AA-BE74-4889-861D-C3ECEA8CEDF2}.Release|AVR.ActiveCfg = Release|AVR
+		{817991AA-BE74-4889-861D-C3ECEA8CEDF2}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
