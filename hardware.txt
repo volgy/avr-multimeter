@@ -32,3 +32,4 @@ A mérõ modul 1%-os vagy jobb tûrésû ellenállásokból épül fel.
 
 
 
+Web ID	  	42723306	   	Access ID	  	81121	  
