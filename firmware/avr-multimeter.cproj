@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>AVRMultimeter</AssemblyName>
-    <Name>AVRMultimeter</Name>
-    <RootNamespace>AVRMultimeter</RootNamespace>
+    <AssemblyName>avr-multimeter</AssemblyName>
+    <Name>avr-multimeter</Name>
+    <RootNamespace>avr-multimeter</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
@@ -95,7 +95,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AVRMultimeter.c">
+    <Compile Include="avr-multimeter.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

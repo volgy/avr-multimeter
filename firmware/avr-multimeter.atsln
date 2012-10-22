@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Atmel Studio Solution File, Format Version 11.00
-Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "AVRMultimeter", "AVRMultimeter.cproj", "{817991AA-BE74-4889-861D-C3ECEA8CEDF2}"
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "avr-multimeter", "avr-multimeter.cproj", "{817991AA-BE74-4889-861D-C3ECEA8CEDF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
