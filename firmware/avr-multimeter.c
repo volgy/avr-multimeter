@@ -15,7 +15,7 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
-
+// LCD constants
 #define LCD_DATA_PORT    PORTB
 #define LCD_DATA_DDR     DDRB
 #define LCD_DATA0_PIN    3
@@ -32,14 +32,14 @@
 #define LCD_CMD_CLR		0x01
 #define LCD_CMD_HOME	0x02
 #define LCD_CMD_DEFAULT_MODE	0x06		// Entry Mode: cursors shifts, display does not shift automatically
-#define LCD_CMD_DISPLAY_ON  0x0C				// Cursor and blinking are off
+#define LCD_CMD_DISPLAY_ON  0x0C			// Cursor and blinking are off
 #define LCD_CMD_DISPLAY_OFF 0x08
 #define LCD_CMD_DDRAM	0x80
 #define LCD_CMD_CGRAM	0x40
 
 #define LCD_RST_DATA	(LCD_DATA_PORT &= ~_BV(LCD_DATA0_PIN) & ~_BV(LCD_DATA1_PIN) & ~_BV(LCD_DATA2_PIN) & ~_BV(LCD_DATA3_PIN))
 
-
+// Analog measurement constants
 #define AREF_LEVEL		2.56
 #define ADC_BITS        10
 #define MAX_SAMPLE  	((1UL<<ADC_BITS)-1)
@@ -58,6 +58,33 @@
 #define A_R2            18.0
 #define A_A_S_1         ((uint16_t)(MAX_A_SAMPLE * (1.0 * A_SENSE_R * (A_R2+A_POT) / (A_R1+A_R2+A_POT)) * A_GAIN / AREF_LEVEL))
 
+// Function prototypes
+void lcd_strobe();
+void lcd_transfer(uint8_t token, uint8_t rs);
+void lcd_data(uint8_t data);
+void lcd_cmd(uint8_t data);
+void lcd_off();
+void lcd_on();
+void lcd_clr();
+void lcd_home();
+void lcd_gotoxy(uint8_t x, uint8_t y);
+void lcd_print(char* str);
+void lcd_init();
+
+void fmt_voltage(uint16_t sample, char* buff);
+void fmt_ampere(uint16_t sample, char* buff);
+
+void adc_init();
+uint16_t adc_v_read();
+uint16_t adc_a_read();
+
+
+/////////////////////////////////////////////////////////////////////////////////
+//                                IMPLEMENTATION
+/////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////// LCD ROUTINES /////////////////////////////////
 void lcd_strobe()
 {
 	LCD_CONTROL_PORT |=  _BV(LCD_E_PIN);
@@ -187,7 +214,8 @@ void lcd_init()
 	lcd_on();
 }
 
-void lcd_voltage(uint16_t sample, char* buff)
+///////////////////////////////// FORMATING    /////////////////////////////////
+void fmt_voltage(uint16_t sample, char* buff)
 {
 	sample = (sample * 100UL) / (V_A_S_1);
 	buff[0] = 'U';
@@ -207,7 +235,7 @@ void lcd_voltage(uint16_t sample, char* buff)
 	buff[10] = '\0';
 }
 
-void lcd_ampere(uint16_t sample, char* buff)
+void fmt_ampere(uint16_t sample, char* buff)
 {
 	uint8_t ma = 0;
 	
@@ -237,25 +265,59 @@ void lcd_ampere(uint16_t sample, char* buff)
 	buff[10] = '\0';
 }
 
+///////////////////////////////// ADC ROUTINES /////////////////////////////////
+void adc_init()
+{
+	// AREF (no ext. cap), right adjust, single ended input (GND), 1X gain
+	ADMUX = _BV(REFS1) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0);	
+	// ADC enabled, clock prescaler = 8 (125kHz)
+	ADCSR = _BV(ADEN) | _BV(ADPS1) | _BV(ADPS0);
+}
 
+uint16_t adc_v_read()
+{
+	// AREF (no ext. cap), right adjust, single ended input (ADC7), 1X gain
+	ADMUX = _BV(REFS1) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0);
+	_delay_us(200);
+	ADCSR |= _BV(ADSC);
+	loop_until_bit_is_clear(ADCSR, ADSC);
+	return (ADC);
+}
+
+uint16_t adc_a_read()
+{
+	// AREF (no ext. cap), right adjust, differential input (ADC8-ADC9), 20X gain
+	ADMUX = _BV(REFS1) | _BV(MUX4) | _BV(MUX3) | _BV(MUX0);
+	_delay_us(200);
+	ADCSR |= _BV(ADSC);
+	loop_until_bit_is_clear(ADCSR, ADSC);
+	return (ADC);
+}
+
+///////////////////////////////// ENTRY POINT  /////////////////////////////////
 int main(void)
 {
 	char buff[16];
-	uint16_t sample = 0;
 	
+	adc_init();
 	lcd_init();
 	
-	for (;;) {                           /* loop forever */
-		lcd_home();
+	for (;;) {                          
+		uint16_t sample_acc = 0;
 		
-		lcd_voltage(sample, buff);
+		for (int i=0; i<AVG_N_SAMPLES; i++) {
+			sample_acc += adc_v_read();
+		}
+		fmt_voltage(sample_acc, buff);
+		lcd_gotoxy(0, 0);
 		lcd_print(buff);
 		
+		for (int i=0; i<AVG_N_SAMPLES; i++) {
+			sample_acc += adc_a_read();
+		}
+		fmt_ampere(sample_acc, buff);
 		lcd_gotoxy(0, 1);
-		lcd_ampere(sample, buff);
 		lcd_print(buff);
-		
-		sample += 100;
 		
 		_delay_ms(10);   
     }

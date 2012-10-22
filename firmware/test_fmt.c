@@ -24,8 +24,6 @@
 
 #define TEST_NOISE      0.01   // Maximum noise level (V), using uniform distribution (ideally, should be Gaussian)
 
-
-
 uint16_t adc_v_read(double v)
 {
     double v_adc;
@@ -50,7 +48,7 @@ uint16_t adc_a_read(double a)
     return sample;
 }
 
-void lcd_voltage(uint16_t sample, char* buff)
+void fmt_voltage(uint16_t sample, char* buff)
 {
     sample = (sample * 100UL) / (uint16_t)(V_A_S_1);
     buff[0] = 'U';
@@ -71,7 +69,7 @@ void lcd_voltage(uint16_t sample, char* buff)
 }
 
 
-void lcd_ampere(uint16_t sample, char* buff)
+void fmt_ampere(uint16_t sample, char* buff)
 {
     uint8_t ma = 0;
     
@@ -115,7 +113,7 @@ int main(int argc, char* argv[])
         for (int i=0; i<AVG_N_SAMPLES; i++) {
             sample_acc += (int)adc_v_read(v); 
         }
-        lcd_voltage(sample_acc, buff);
+        fmt_voltage(sample_acc, buff);
         double vv = sample_acc * (V_R1+V_R2+V_POT) / (V_R2+V_POT) * AREF_LEVEL / MAX_A_SAMPLE;
         printf("%2.2f V: %2.2f V: %s [%5d]\n", v, vv, buff, (int)(sample_acc));
     }
@@ -128,7 +126,7 @@ int main(int argc, char* argv[])
         for (int i=0; i<AVG_N_SAMPLES; i++) {
             sample_acc += (int)adc_a_read(a); 
         }
-        lcd_ampere(sample_acc, buff);
+        fmt_ampere(sample_acc, buff);
         double aa = sample_acc * (A_R1+A_R2+A_POT) / (A_R2+A_POT) * AREF_LEVEL / MAX_A_SAMPLE / A_GAIN / A_SENSE_R;
         printf("%2.2f A: %2.2f A: %s [%5d]\n", a, aa, buff, (int)(sample_acc));
     }

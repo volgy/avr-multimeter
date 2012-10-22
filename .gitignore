@@ -1,2 +1,6 @@
 
 .DS_Store
+firmware/Debug
+firmware/Release
+firmware/*.atsuo
+TcfTransactionLog.csv
