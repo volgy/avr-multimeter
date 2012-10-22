@@ -60,121 +60,155 @@ uint16_t adc_a_read(double a)
 }
 
 
+char next_digit(uint16_t* r, uint16_t q) {
+	register uint16_t d = 0;
+	
+	if (q) {
+    	d = (*r) / q;
+    	(*r) -= d * q;
+    }
+	return ('0' + d);
+}	
+
+
+void lcd_voltage2(uint16_t sample, char* buff)
+{
+    sample = (sample * 100UL) / (uint16_t)(V_A_S_1);
+    buff[0] = 'U';
+	buff[1] = '=';
+	buff[2] = ' ';
+
+    buff[3] = ' ';
+    for (int i = 7;  sample || (i>3); i--, sample /= 10) {
+        buff[i] = '0' + (sample % 10);
+        if (i == 6) {
+            buff[--i] = '.';
+        }
+    }
+
+	buff[8] = ' ';
+	buff[9] = 'V';
+	buff[10] = '\0';
+
+}
 
 void lcd_voltage(uint16_t sample, char* buff)
 {
-    uint16_t r = sample;
-    uint16_t d;
+	uint16_t r = sample;
+	uint16_t d;
 
-    buff[0] = 'U';
-    buff[1] = '=';
-    buff[2] = ' ';
-    
-    d = r / V_A_S_10;
-    if (d) {
-        buff[3] = '0' + d;
-    } 
-    else {
-        buff[3] = ' ';
-    }
-    r -= d * V_A_S_10;
-    
-    d = r / V_A_S_1;
-    buff[4] = '0' + d;
-    r -= d * V_A_S_1;
+	buff[0] = 'U';
+	buff[1] = '=';
+	buff[2] = ' ';
+	
+	if (r < V_A_S_10) {
+		buff[3] = ' ';
+	}
+	else {
+		buff[3] = next_digit(&r, V_A_S_10);
+	}
+	
+	buff[4] = next_digit(&r, V_A_S_1);;
 
-    buff[5] = '.';
+	buff[5] = '.';
 
-    d = r / V_A_S_0_1;
-    buff[6] = '0' + d; 
-    r -= d * V_A_S_0_1;
+	buff[6] = next_digit(&r, V_A_S_0_1);
+	buff[7] = next_digit(&r, V_A_S_0_01);
 
-    d = r / V_A_S_0_01;
-    buff[7] = '0' + d;
-
-    buff[8] = ' ';
-    buff[9] = 'V';
-    buff[10] = '\0';
+	buff[8] = ' ';
+	buff[9] = 'V';
+	buff[10] = '\0';
 }
+
+void lcd_ampere2(uint16_t sample, char* buff)
+{
+    uint8_t ma = 0;
+    
+    if (sample < A_A_S_1) {
+        sample = (sample * 10000UL) / (uint16_t)(A_A_S_1);
+        ma = 1;
+    }
+    else {
+        sample = (sample * 100UL) / (uint16_t)(A_A_S_1);
+    }
+
+    buff[0] = 'I';
+	buff[1] = '=';
+	buff[2] = ' ';
+
+    buff[3] = ' ';
+    buff[7] = '0';
+    for (int i = (ma ? 6 : 7);  sample || (i>3); i--, sample /= 10) {
+        buff[i] = '0' + (sample % 10);
+        if (i == 6) {
+            buff[--i] = '.';
+        }
+    }
+
+	buff[8] = ma ? 'm' : ' ';
+	buff[9] = 'A';
+	buff[10] = '\0';
+
+}
+
 
 void lcd_ampere(uint16_t sample, char* buff)
 {
-    uint16_t r = sample;
-    uint16_t d;
+	uint16_t r = sample;
+	uint16_t d;
 
-    buff[0] = 'I';
-    buff[1] = '=';
+	buff[0] = 'I';
+	buff[1] = '=';
 
-    if (sample < A_A_S_1) {
-        uint8_t z = 1;
-        
-        if (sample < A_A_S_0_1) {
-            buff[2] = ' ';
-        }
-        else {
-            d = r / A_A_S_0_1;
-            buff[2] = '0' + d;
-            r -= d * A_A_S_0_1;
-            z = 0;
-        }
-        
-        if (z && (sample < A_A_S_0_01)) {
-            buff[3] = ' ';
-        }
-        else {
-            d = r / A_A_S_0_01;
-            buff[3] = '0' + d;
-            r -= d * A_A_S_0_01;
-        }
+	if (sample < A_A_S_1) {
+		uint8_t z = 1;
+		
+		if (sample < A_A_S_0_1) {
+			buff[2] = ' ';
+		}
+		else {
+			buff[2] = next_digit(&r, A_A_S_0_1);
+			z = 0;
+		}
+		
+		if (z && (sample < A_A_S_0_01)) {
+			buff[3] = ' ';
+		}
+		else {
+			buff[3] = next_digit(&r, A_A_S_0_01);
+		}
 
-        d = r / A_A_S_0_001;
-        buff[4] = '0' + d;
-        r -= d * A_A_S_0_001;
-        
-        buff[5] = '.';
-        
-        d = r / A_A_S_0_0001;
-        buff[6] = '0' + d;
-        r -= d * A_A_S_0_0001;
+		buff[4] = next_digit(&r, A_A_S_0_001);
+		
+		buff[5] = '.';
 
-        d = r / A_A_S_0_00001;
-        buff[7] = '0' + d;
-        r -= d * A_A_S_0_00001;
+		buff[6] = next_digit(&r, A_A_S_0_0001);
+		buff[7] = next_digit(&r, A_A_S_0_00001);
 
+		buff[8] = 'm';
+	}
+	else {
+		buff[2] = ' ';
 
-        buff[8] = 'm';
-    }
-    else {
-        buff[2] = ' ';
+		if (sample < A_A_S_10) {
+			buff[3] = ' ';
+		}
+		else {
+			buff[3] = next_digit(&r, A_A_S_10);
+		}
 
-        if (sample < A_A_S_10) {
-            buff[3] = ' ';
-        }
-        else {
-            d = r / A_A_S_10;
-            buff[3] = '0' + d;
-            r -= d * A_A_S_10;
-        } 
-        
-        d = r / A_A_S_1;
-        buff[4] = '0' + d;
-        r -= d * A_A_S_1;
-    
-        buff[5] = '.';
-    
-        d = r / A_A_S_0_1;
-        buff[6] = '0' + d; 
-        r -= d * A_A_S_0_1;
-    
-        d = r / A_A_S_0_01;
-        buff[7] = '0' + d; 
-    
-        buff[8] = ' ';
-    }
-    
-    buff[9] = 'A';
-    buff[10] = '\0';
+		buff[4] = next_digit(&r, A_A_S_1);
+		
+		buff[5] = '.';
 
+		buff[6] = next_digit(&r, A_A_S_0_1);
+		buff[7] = next_digit(&r, A_A_S_0_01);
+		
+		buff[8] = ' ';
+	}
+	
+	buff[9] = 'A';
+	buff[10] = '\0';
 }
 
 int main(int argc, char* argv[])
@@ -183,17 +217,15 @@ int main(int argc, char* argv[])
     double a = 0.0;
     char buff[16];
     
-    srand(1976);
-    
-    
+    srand(1976);    
     while (v < 32.0) {
         v += 0.01;
         uint16_t sample_acc = 0;
         for (int i=0; i<AVG_N_SAMPLES; i++) {
             sample_acc += (int)adc_v_read(v); 
         }
-        lcd_voltage(sample_acc, buff);
-        double vv = sample_acc * (120+V_R2+V_POT) / (V_R2+V_POT) * AREF_LEVEL / MAX_A_SAMPLE;
+        lcd_voltage2(sample_acc, buff);
+        double vv = sample_acc * (V_R1+V_R2+V_POT) / (V_R2+V_POT) * AREF_LEVEL / MAX_A_SAMPLE;
         printf("%2.2f V: %2.2f V: %s [%5d]\n", v, vv, buff, (int)(sample_acc));
     }
     
@@ -205,7 +237,7 @@ int main(int argc, char* argv[])
         for (int i=0; i<AVG_N_SAMPLES; i++) {
             sample_acc += (int)adc_a_read(a); 
         }
-        lcd_ampere(sample_acc, buff);
+        lcd_ampere2(sample_acc, buff);
         double aa = sample_acc * (A_R1+A_R2+A_POT) / (A_R2+A_POT) * AREF_LEVEL / MAX_A_SAMPLE / A_GAIN / A_SENSE_R;
         printf("%2.2f A: %2.2f A: %s [%5d]\n", a, aa, buff, (int)(sample_acc));
     }
