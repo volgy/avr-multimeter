@@ -312,6 +312,7 @@ int main(void)
 		lcd_gotoxy(0, 0);
 		lcd_print(buff);
 		
+		sample_acc = 0;
 		for (int i=0; i<AVG_N_SAMPLES; i++) {
 			sample_acc += adc_a_read();
 		}
